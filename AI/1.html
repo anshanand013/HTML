@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neon Runner Mobile</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #0a0a0a;
+            font-family: sans-serif;
+            touch-action: none; /* Prevents zooming/scrolling while playing */
+        }
+        canvas {
+            display: block;
+        }
+        #ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #0ff;
+            font-size: 20px;
+            pointer-events: none;
+            text-shadow: 0 0 8px #0ff;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ui">Score: 0</div>
+    <canvas id="gameCanvas"></canvas>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const ui = document.getElementById('ui');
+
+// Resize for mobile screens
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let score = 0;
+let gameActive = true;
+let frame = 0;
+
+const player = {
+    x: 50,
+    y: canvas.height / 2,
+    width: 35,
+    height: 35,
+    dy: 0,
+    gravity: 0.5,
+    jumpPower: -8,
+    color: '#0ff',
+    particles: [],
+    
+    draw() {
+        this.particles.forEach((p, i) => {
+            p.x -= 3;
+            p.alpha -= 0.03;
+            ctx.fillStyle = `rgba(0, 255, 255, ${p.alpha})`;
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+            if (p.alpha <= 0) this.particles.splice(i, 1);
+        });
+
+        let pulse = Math.sin(frame * 0.1) * 3;
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = this.color;
+        ctx.fillRect(this.x, this.y, this.width, this.height + pulse);
+        ctx.shadowBlur = 0;
+
+        if (frame % 3 === 0) {
+            this.particles.push({ x: this.x, y: this.y + 15, size: Math.random() * 5, alpha: 1 });
+        }
+    },
+
+    update() {
+        this.dy += this.gravity;
+        this.y += this.dy;
+
+        if (this.y + this.height > canvas.height) {
+            this.y = canvas.height - this.height;
+            this.dy = 0;
+        }
+        if (this.y < 0) {
+            this.y = 0;
+            this.dy = 0;
+        }
+    }
+};
+
+const obstacles = [];
+function spawnObstacle() {
+    let height = Math.random() * (canvas.height / 2);
+    obstacles.push({
+        x: canvas.width,
+        y: Math.random() > 0.5 ? 0 : canvas.height - height, // Top or Bottom
+        width: 40,
+        height: height,
+        speed: 4 + (score / 5)
+    });
+}
+
+const stars = Array.from({ length: 30 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    size: Math.random() * 2,
+    speed: Math.random() * 1 + 0.5
+}));
+
+function drawBackground() {
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(s => {
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(s.x, s.y, s.size, s.size);
+        s.x -= s.speed;
+        if (s.x < 0) s.x = canvas.width;
+    });
+}
+
+function loop() {
+    if (!gameActive) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBackground();
+
+    player.update();
+    player.draw();
+
+    if (frame % 80 === 0) spawnObstacle();
+    
+    obstacles.forEach((obs, i) => {
+        obs.x -= obs.speed;
+        ctx.fillStyle = '#ff0055';
+        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+
+        if (player.x < obs.x + obs.width &&
+            player.x + player.width > obs.x &&
+            player.y < obs.y + obs.height &&
+            player.y + player.height > obs.y) {
+            gameOver();
+        }
+
+        if (obs.x + obs.width < 0) {
+            obstacles.splice(i, 1);
+            score++;
+            ui.innerText = `Score: ${score}`;
+        }
+    });
+
+    frame++;
+    requestAnimationFrame(loop);
+}
+
+function gameOver() {
+    gameActive = false;
+    ctx.fillStyle = 'rgba(0,0,0,0.8)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'white';
+    ctx.textAlign = 'center';
+    ctx.font = '30px sans-serif';
+    ctx.fillText("GAME OVER", canvas.width/2, canvas.height/2);
+    ctx.font = '18px sans-serif';
+    ctx.fillText("Tap to Restart", canvas.width/2, canvas.height/2 + 50);
+}
+
+// TOUCH AND CLICK CONTROLS
+const handleInput = (e) => {
+    e.preventDefault(); // Stop scrolling
+    if (!gameActive) {
+        score = 0;
+        obstacles.length = 0;
+        player.y = canvas.height / 2;
+        player.dy = 0;
+        gameActive = true;
+        ui.innerText = `Score: 0`;
+        loop();
+    } else {
+        player.dy = player.jumpPower;
+    }
+};
+
+window.addEventListener('touchstart', handleInput, { passive: false });
+window.addEventListener('mousedown', handleInput);
+
+loop();
+</script>
+</body>
+</html>                         

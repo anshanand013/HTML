@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeFlow | Ansh Anand Mastery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        body { margin: 0; background: linear-gradient(-45deg, #030712, #080b1a, #111827, #030712); background-size: 400% 400%; animation: gradientBG 15s ease infinite; color: white; overflow-x: hidden; font-family: 'Inter', sans-serif; }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        
+        .stars-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        .star { position: absolute; background: white; border-radius: 50%; opacity: 0.5; animation: moveStar linear infinite; }
+        @keyframes moveStar { from { transform: translateY(0); } to { transform: translateY(-100vh); } }
+        
+        .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); transition: 0.4s ease; position: relative; z-index: 10; }
+        .glass-card:hover { transform: translateY(-10px); background: rgba(255, 255, 255, 0.1); border-color: #3b82f6; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        nav, header, main, footer { position: relative; z-index: 10; }
+    </style>
+</head>
+<body>
+    <div class="stars-container" id="starField"></div>
+
+    <nav class="fixed w-full z-50 bg-black/60 backdrop-blur-xl border-b border-white/10 py-4 px-6 flex justify-between items-center">
+        <div class="text-xl font-black text-blue-500 tracking-tighter">ANSH.ANAND</div>
+        <a href="#contact" class="text-xs font-bold bg-white text-black px-5 py-2 rounded-full hover:bg-blue-500 hover:text-white transition shadow-lg">ENROLL NOW</a>
+    </nav>
+
+    <header class="pt-48 pb-20 px-6 text-center">
+        <div data-aos="fade-up">
+            <h1 class="text-5xl md:text-8xl font-extrabold mb-6 tracking-tighter">
+                The Complete <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">Engineer's Path.</span>
+            </h1>
+            <p class="text-gray-200 text-lg md:text-xl max-w-2xl mx-auto">Master the core languages with Ansh Anand's expert curriculum.</p>
+        </div>
+    </header>
+
+    <main class="py-10 px-6 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        
+        <a href="java-course.html" class="glass-card p-8 rounded-3xl block group" data-aos="zoom-in">
+            <div class="w-12 h-12 flex items-center justify-center bg-red-500/20 text-red-400 rounded-xl font-bold mb-4">J</div>
+            <h3 class="text-2xl font-bold mb-2">Java Enterprise</h3>
+            <p class="text-gray-300 text-sm mb-6">Master OOPs, Multithreading, and Spring Boot with Ansh's expert curriculum.</p>
+            <div class="flex items-center text-xs text-red-400 font-bold tracking-widest uppercase">60 LESSONS • INTERMEDIATE &rarr;</div>
+        </a>
+
+        <a href="c-course.html" class="glass-card p-8 rounded-3xl block group" data-aos="zoom-in" data-aos-delay="100">
+            <div class="w-12 h-12 flex items-center justify-center bg-blue-500/20 text-blue-400 rounded-xl font-bold mb-4">C</div>
+            <h3 class="text-2xl font-bold mb-2">C Language</h3>
+            <p class="text-gray-300 text-sm mb-6">Pointers, Memory Management, and Foundations from scratch.</p>
+            <div class="flex items-center text-xs text-blue-400 font-bold tracking-widest uppercase">45 LESSONS • BEGINNER &rarr;</div>
+        </a>
+
+        <a href="cpp-course.html" class="glass-card p-8 rounded-3xl block group" data-aos="zoom-in" data-aos-delay="200">
+            <div class="w-12 h-12 flex items-center justify-center bg-indigo-500/20 text-indigo-400 rounded-xl font-bold mb-4">C++</div>
+            <h3 class="text-2xl font-bold mb-2">C++ & DSA</h3>
+            <p class="text-gray-300 text-sm mb-6">Competitive Coding, Data Structures, and Interview Algorithms.</p>
+            <div class="flex items-center text-xs text-indigo-400 font-bold tracking-widest uppercase">80 LESSONS • ADVANCED &rarr;</div>
+        </a>
+
+        <a href="web-course.html" class="glass-card p-8 rounded-3xl block group" data-aos="zoom-in" data-aos-delay="300">
+            <div class="w-12 h-12 flex items-center justify-center bg-orange-500/20 text-orange-400 rounded-xl font-bold mb-4">W</div>
+            <h3 class="text-2xl font-bold mb-2">Web Fundamentals</h3>
+            <p class="text-gray-300 text-sm mb-6">Responsive Frontend with HTML5, CSS3, and Modern JavaScript.</p>
+            <div class="flex items-center text-xs text-orange-400 font-bold tracking-widest uppercase">30 LESSONS • BEGINNER &rarr;</div>
+        </a>
+
+        <a href="python-course.html" class="glass-card p-8 rounded-3xl block group" data-aos="zoom-in" data-aos-delay="400">
+            <div class="w-12 h-12 flex items-center justify-center bg-yellow-500/20 text-yellow-400 rounded-xl font-bold mb-4">Py</div>
+            <h3 class="text-2xl font-bold mb-2">Python Mastery</h3>
+            <p class="text-gray-300 text-sm mb-6">Learn AI foundations, Automation, and Backend Development.</p>
+            <div class="flex items-center text-xs text-yellow-400 font-bold tracking-widest uppercase">50 LESSONS • ALL LEVELS &rarr;</div>
+        </a>
+
+    </main>
+
+    <footer id="contact" class="mt-20 py-24 bg-blue-600/10 backdrop-blur-lg border-t border-white/10 text-center">
+        <h2 class="text-4xl font-black mb-4">Start Your Career Today</h2>
+        <a href="mailto:anshanand013@gmail.com" class="text-2xl md:text-3xl font-bold hover:text-blue-400 transition">anshanand013@gmail.com</a>
+    </footer>
+
+    <script>
+        const container = document.getElementById('starField');
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            const size = Math.random() * 3 + 'px';
+            star.style.width = size; star.style.height = size;
+            star.style.left = Math.random() * 100 + 'vw';
+            star.style.top = Math.random() * 100 + 'vh';
+            star.style.animationDuration = (Math.random() * 10 + 5) + 's';
+            container.appendChild(star);
+        }
+    </script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>AOS.init({ duration: 1000, once: true });</script>
+</body>
+</html>

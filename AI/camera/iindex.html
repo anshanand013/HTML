@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Flow Pro - Optimized</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #050505;
+            font-family: 'Inter', sans-serif;
+        }
+
+        #ui {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            color: white;
+            z-index: 10;
+            pointer-events: none;
+            text-transform: uppercase;
+        }
+
+        .gesture-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 4px solid #333;
+            transition: all 0.2s ease;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+
+        .active {
+            background: rgba(0, 255, 255, 0.15);
+            border-left: 4px solid cyan;
+            transform: translateX(10px);
+            color: cyan;
+        }
+
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            color: red;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        /* Small preview to see if the camera sees your hand */
+        #input_video {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            width: 160px;
+            height: 120px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transform: scaleX(-1);
+            /* Mirror view */
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="loading">INITIALIZING NEURAL SENSORS...</div>
+
+    <div id="ui">
+        <h1 style="margin:0; font-size: 1.2em; letter-spacing: 4px;">Neural Flow</h1>
+        <div id="sphere-ui" class="gesture-card">✊ FIST → SPHERE</div>
+        <div id="heart-ui" class="gesture-card">🤏 PINCH → HEART</div>
+        <div id="saturn-ui" class="gesture-card">✋ PALM → SATURN</div>
+    </div>
+
+    <video id="input_video"></video>
+
+    <script src="1.js"></script>
+    <script src="2.js"></script>
+    <script src="3.js"></script>
+
+    <script>
+        const videoElement = document.getElementById('input_video');
+        const loadingScreen = document.getElementById('loading');
+
+        // --- CONFIGURATION ---
+        const particleCount = 20000;
+        let currentShape = 'sphere';
+        let handInView = false;
+        let lerpFactor = 0.1;
+
+        // --- THREE.JS SETUP ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 70;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        document.body.appendChild(renderer.domElement);
+
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const targets = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        const material = new THREE.PointsMaterial({
+            size: 0.35,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.7,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+
+        const points = new THREE.Points(geometry, material);
+        scene.add(points);
+
+        // --- MATHEMATICAL SHAPES ---
+        const Shapes = {
+            sphere: (i) => {
+                const phi = Math.acos(-1 + (2 * i) / particleCount);
+                const theta = Math.sqrt(particleCount * Math.PI) * phi;
+                return { x: 25 * Math.sin(phi) * Math.cos(theta), y: 25 * Math.sin(phi) * Math.sin(theta), z: 25 * Math.cos(phi) };
+            },
+            heart: (i) => {
+                const t = (i / particleCount) * Math.PI * 2;
+                const pulse = 1 + Math.sin(Date.now() * 0.01) * 0.05; // Beating effect
+                return {
+                    x: pulse * 1.8 * (16 * Math.pow(Math.sin(t), 3)),
+                    y: pulse * 1.8 * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)),
+                    z: (Math.random() - 0.5) * 10
+                };
+            },
+            saturn: (i) => {
+                if (i < particleCount * 0.4) {
+                    const phi = Math.acos(-1 + (2 * i) / (particleCount * 0.4));
+                    const theta = Math.sqrt(particleCount * 0.4 * Math.PI) * phi;
+                    return { x: 15 * Math.sin(phi) * Math.cos(theta), y: 15 * Math.sin(phi) * Math.sin(theta), z: 15 * Math.cos(phi) };
+                } else {
+                    const angle = Math.random() * Math.PI * 2;
+                    const r = 28 + Math.random() * 10;
+                    return { x: Math.cos(angle) * r, y: (Math.random() - 0.5) * 2, z: Math.sin(angle) * r };
+                }
+            }
+        };
+
+        // --- HAND TRACKING & PINCH LOGIC ---
+        const hands = new Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
+        hands.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.5, // Lowered for easier detection
+            minTrackingConfidence: 0.5
+        });
+
+        hands.onResults((results) => {
+            loadingScreen.style.display = 'none';
+
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                handInView = true;
+                const lm = results.multiHandLandmarks[0];
+
+                // Track Index Tip for movement
+                const indexX = (lm[8].x - 0.5) * -140;
+                const indexY = (lm[8].y - 0.5) * -100;
+
+                // PINCH DETECTION: Increased threshold to 0.1 for easier triggering
+                const pinchDist = Math.hypot(lm[8].x - lm[4].x, lm[8].y - lm[4].y);
+                const isFist = lm[8].y > lm[6].y && lm[12].y > lm[10].y && lm[16].y > lm[14].y;
+
+                let prevShape = currentShape;
+                if (isFist) {
+                    currentShape = 'sphere';
+                } else if (pinchDist < 0.1) { // 0.1 is very generous for pinch
+                    currentShape = 'heart';
+                } else {
+                    currentShape = 'saturn';
+                }
+
+                // UI Update
+                if (prevShape !== currentShape) {
+                    document.querySelectorAll('.gesture-card').forEach(c => c.classList.remove('active'));
+                    document.getElementById(currentShape + '-ui').classList.add('active');
+                }
+
+                // Update Targets & Colors
+                const colorObj = new THREE.Color();
+                colorObj.setHSL(lm[8].x, 0.8, 0.5);
+
+                for (let i = 0; i < particleCount; i++) {
+                    const template = Shapes[currentShape](i);
+                    targets[i * 3] = template.x + indexX;
+                    targets[i * 3 + 1] = template.y + indexY;
+                    targets[i * 3 + 2] = template.z;
+
+                    colors[i * 3] = colorObj.r;
+                    colors[i * 3 + 1] = colorObj.g;
+                    colors[i * 3 + 2] = colorObj.b;
+                }
+                geometry.attributes.color.needsUpdate = true;
+            } else {
+                handInView = false;
+                document.querySelectorAll('.gesture-card').forEach(c => c.classList.remove('active'));
+            }
+        });
+
+        // --- ANIMATION LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+            const posArr = geometry.attributes.position.array;
+
+            for (let i = 0; i < particleCount * 3; i++) {
+                const step = handInView ? 0.12 : 0.03;
+                posArr[i] += (targets[i] - posArr[i]) * step;
+
+                if (!handInView) {
+                    posArr[i] += Math.sin(Date.now() * 0.001 + i) * 0.03;
+                }
+            }
+
+            geometry.attributes.position.needsUpdate = true;
+            points.rotation.y += 0.004;
+            renderer.render(scene, camera);
+        }
+
+        const cam = new Camera(videoElement, {
+            onFrame: async () => { await hands.send({ image: videoElement }); },
+            width: 640, height: 480
+        });
+
+        cam.start();
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>

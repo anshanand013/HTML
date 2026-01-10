@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELOCITY | The Supersonic Revolution</title>
+    <style>
+        :root {
+            --aubergine: #5f0f40;
+            --ruby: #9a031e;
+            --gold: #fb8b24;
+            --rust: #e36414;
+            --teal: #0f4c5c;
+            --black: #050505;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Syncopate', sans-serif; }
+        body { background: var(--black); color: #fff; overflow-x: hidden; }
+        p, .desc { font-family: 'Inter', sans-serif; font-weight: 300; line-height: 1.8; color: #ccc; }
+
+        /* Background Particle Engine */
+        #particleCanvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; background: #000;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.5rem 5%; position: fixed; width: 100%; z-index: 100;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(251, 139, 36, 0.2);
+        }
+        .logo { font-size: 1.2rem; font-weight: 900; letter-spacing: 8px; color: var(--gold); }
+        nav ul { display: flex; list-style: none; gap: 30px; }
+        nav ul li a { text-decoration: none; color: #fff; font-size: 0.6rem; letter-spacing: 2px; }
+
+        /* Sections General */
+        section { padding: 120px 10%; position: relative; }
+        .huge-title { font-size: clamp(3rem, 10vw, 8rem); font-weight: 900; font-style: italic; line-height: 0.9; margin-bottom: 40px; }
+        .accent-text { color: var(--gold); text-transform: uppercase; letter-spacing: 5px; font-size: 0.9rem; margin-bottom: 10px; display: block; }
+
+        /* Hero */
+        .hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .hero h1 { background: linear-gradient(to right, #fff, var(--ruby), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* Feature Grid */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 60px; }
+        .feature-card { 
+            padding: 40px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+            transition: 0.4s; position: relative; overflow: hidden;
+        }
+        .feature-card:hover { border-color: var(--gold); background: rgba(154, 3, 30, 0.1); transform: translateY(-10px); }
+        .feature-card h3 { color: var(--gold); margin-bottom: 15px; letter-spacing: 2px; }
+
+        /* Big Spec Section */
+        .specs-mega { background: var(--aubergine); display: flex; justify-content: space-around; padding: 100px 5%; border-top: 4px solid var(--rust); }
+        .spec-box { text-align: center; }
+        .spec-box span { font-size: 5rem; font-weight: 900; color: #fff; display: block; line-height: 1; }
+        .spec-box label { color: var(--gold); font-size: 0.7rem; letter-spacing: 3px; }
+
+        /* Content Blocks */
+        .content-split { display: grid; grid-template-columns: 1fr 1fr; gap: 100px; align-items: center; }
+        .visual-placeholder { width: 100%; height: 400px; background: linear-gradient(45deg, var(--teal), var(--aubergine)); border-radius: 2px; position: relative; }
+        .visual-placeholder::after { content: 'ENGINEERING SCHEMATIC'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.3; letter-spacing: 5px; }
+
+        /* Comparison Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 50px; }
+        th, td { padding: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left; }
+        th { color: var(--gold); text-transform: uppercase; font-size: 0.8rem; }
+        .highlight-row { background: rgba(154, 3, 30, 0.2); }
+
+        /* Footer */
+        footer { padding: 100px 10%; background: #000; border-top: 1px solid var(--teal); }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 50px; }
+        .footer-bottom { margin-top: 80px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.6rem; color: #666; }
+
+        .btn {
+            padding: 20px 40px; border: 1px solid var(--gold); color: #fff; text-decoration: none;
+            display: inline-block; font-weight: 900; transition: 0.4s; background: transparent; cursor: pointer;
+        }
+        .btn:hover { background: var(--gold); color: var(--black); box-shadow: 0 0 30px var(--gold); }
+
+        @media (max-width: 900px) {
+            .content-split { grid-template-columns: 1fr; gap: 50px; }
+            .specs-mega { flex-direction: column; gap: 50px; }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@300;600;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <canvas id="particleCanvas"></canvas>
+
+    <nav>
+        <div class="logo">VELOCITY</div>
+        <ul>
+            <li><a href="#engineering">ENGINEERING</a></li>
+            <li><a href="#performance">PERFORMANCE</a></li>
+            <li><a href="#inventory">INVENTORY</a></li>
+        </ul>
+        <a href="#" class="btn" style="padding: 10px 20px; font-size: 0.6rem;">RESERVE NOW</a>
+    </nav>
+
+    <section class="hero">
+        <span class="accent-text">The Dawn of Mach 1 Electric</span>
+        <h1 class="huge-title">SUPER<br>SONIC</h1>
+        <p style="max-width: 600px; text-align: center;">V-Series is not a car. It is a land-based aerospace achievement. 0 to 60 in the time it takes to blink. Silent. Violent. Velocity.</p>
+        <div style="margin-top: 40px;">
+            <a href="#engineering" class="btn">DISCOVER THE TECH</a>
+        </div>
+    </section>
+
+    <section class="specs-mega">
+        <div class="spec-box">
+            <span>1.8s</span>
+            <label>0-60 MPH</label>
+        </div>
+        <div class="spec-box">
+            <span>320+</span>
+            <label>TOP SPEED MPH</label>
+        </div>
+        <div class="spec-box">
+            <span>1200</span>
+            <label>HORSEPOWER</label>
+        </div>
+        <div class="spec-box">
+            <span>800V</span>
+            <label>ULTRA-FAST CHARGE</label>
+        </div>
+    </section>
+
+    <section id="engineering">
+        <div class="content-split">
+            <div>
+                <span class="accent-text">Aerodynamics</span>
+                <h2 class="huge-title" style="font-size: 3rem;">SCULPTED BY THE WIND</h2>
+                <p>The V-Series body is composed of high-modulus carbon fiber, utilizing active aero-flaps that adjust 100 times per second. This creates a virtual "vacuum" effect, pinning the vehicle to the tarmac even as you approach subsonic speeds.</p>
+                <br>
+                <p>Every intake, every curve, and every vent serves a singular purpose: cooling the tri-motor core while maintaining a drag coefficient of 0.19—the lowest in production history.</p>
+            </div>
+            <div class="visual-placeholder"></div>
+        </div>
+    </section>
+
+    
+
+    <section id="performance" style="background: rgba(15, 76, 92, 0.1);">
+        <span class="accent-text">Unrivaled Comparison</span>
+        <h2 class="huge-title" style="font-size: 3.5rem;">BREAKING THE HIERARCHY</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Competitor S</th>
+                    <th>Competitor L</th>
+                    <th style="color: var(--gold);">VELOCITY V-1</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Chassis Material</td>
+                    <td>Aluminum</td>
+                    <td>Carbon Mix</td>
+                    <td>Full Diamond-Weave Carbon</td>
+                </tr>
+                <tr class="highlight-row">
+                    <td>Acceleration (0-60)</td>
+                    <td>2.1s</td>
+                    <td>2.4s</td>
+                    <td style="color: var(--gold); font-weight: 900;">1.82s</td>
+                </tr>
+                <tr>
+                    <td>Range</td>
+                    <td>405 mi</td>
+                    <td>380 mi</td>
+                    <td>620 mi</td>
+                </tr>
+                <tr>
+                    <td>AI Co-Pilot</td>
+                    <td>Basic</td>
+                    <td>Standard</td>
+                    <td>Predictive Neural Net</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <div class="grid">
+            <div class="feature-card">
+                <h3>Neural Drive</h3>
+                <p>The steering system predicts your line based on eye-tracking technology, pre-loading the suspension for the perfect corner.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Solid State</h3>
+                <p>Next-generation batteries that do not catch fire, charge in 8 minutes, and last for 1,000,000 miles.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Titanium Core</h3>
+                <p>A safety cell inspired by Formula 1 monocoques, capable of withstanding 20Gs of impact force.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-grid">
+            <div>
+                <div class="logo" style="margin-bottom: 20px;">VELOCITY</div>
+                <p>Leading the world's transition to supersonic sustainable transport. Join the elite.</p>
+            </div>
+            <div>
+                <h4>MODELS</h4>
+                <p>V-1 Roadster</p><p>V-X SUV</p><p>V-Track Only</p>
+            </div>
+            <div>
+                <h4>COMPANY</h4>
+                <p>Story</p><p>Press</p><p>Investors</p>
+            </div>
+            <div>
+                <h4>CONTACT</h4>
+                <p>Geneva, CH</p><p>Austin, TX</p><p>Tokyo, JP</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 VELOCITY AEROSPACE & AUTOMOTIVE. ALL RIGHTS RESERVED. NO SONIC BOOMS PERMITTED IN RESIDENTIAL AREAS.
+        </div>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function init() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = [];
+            for (let i = 0; i < 200; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    length: Math.random() * 80 + 20,
+                    speed: Math.random() * 15 + 10,
+                    opacity: Math.random() * 0.5 + 0.1
+                });
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)'; // Trail effect
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(p => {
+                ctx.strokeStyle = `rgba(251, 139, 36, ${p.opacity})`; // Using your Gold color
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p.x - p.length, p.y);
+                ctx.stroke();
+
+                p.x += p.speed; // Move right for "forward" motion
+                if (p.x - p.length > canvas.width) {
+                    p.x = 0;
+                    p.y = Math.random() * canvas.height;
+                }
+            });
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', init);
+        init();
+        animate();
+    </script>
+</body>
+</html>
