@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mini Arena - Auto Aim Edition</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #222;
+            font-family: sans-serif;
+            touch-action: none;
+        }
+
+        canvas {
+            display: block;
+            background: #2d5a27;
+        }
+
+        /* UI Styling */
+        #ui {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: white;
+            text-shadow: 2px 2px 2px #000;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .stat {
+            font-size: 20px;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        /* Mobile Controls */
+        .btn {
+            position: fixed;
+            bottom: 30px;
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        #shoot-btn {
+            right: 30px;
+            background: rgba(255, 0, 0, 0.6);
+            width: 90px;
+            height: 90px;
+            font-size: 18px;
+        }
+
+        #reload-btn {
+            right: 130px;
+            background: rgba(255, 165, 0, 0.6);
+        }
+
+        #gun-btn {
+            right: 220px;
+            background: rgba(0, 0, 255, 0.6);
+        }
+
+        #joystick-zone {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 130px;
+            height: 130px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="ui">
+        <div class="stat">❤️ HP: <span id="health">100</span></div>
+        <div class="stat">🔫 <span id="gunName">Pistol</span></div>
+        <div class="stat">🔁 <span id="ammo">12/12</span></div>
+        <div class="stat">🎯 Score: <span id="score">0</span></div>
+    </div>
+
+    <div id="joystick-zone"></div>
+    <div id="gun-btn" class="btn">GUN</div>
+    <div id="reload-btn" class="btn">RLD</div>
+    <div id="shoot-btn" class="btn">FIRE</div>
+
+    <canvas id="game"></canvas>
+
+    <script>
+        const canvas = document.getElementById("game");
+        const ctx = canvas.getContext("2d");
+
+        // UI Elements
+        const healthEl = document.getElementById("health");
+        const scoreEl = document.getElementById("score");
+        const gunNameEl = document.getElementById("gunName");
+        const ammoEl = document.getElementById("ammo");
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener("resize", resize);
+        resize();
+
+        /* GAME DATA */
+        let health = 100;
+        let score = 0;
+        let lastShot = 0;
+        const bullets = [];
+        const enemies = [];
+        const loot = [];
+        const buildings = [];
+
+        const player = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            size: 18,
+            speed: 5,
+            color: "#00d2ff",
+            angle: 0
+        };
+
+        const guns = [
+            { name: "Pistol", dmg: 25, rate: 400, mag: 12, ammo: 12, color: "#ffff00" },
+            { name: "SMG", dmg: 10, rate: 120, mag: 30, ammo: 30, color: "#ffffff" },
+            { name: "Shotgun", dmg: 45, rate: 1000, mag: 5, ammo: 5, color: "#ff9900" }
+        ];
+        let currentGun = 0;
+
+        /* INIT WORLD */
+        for (let i = 0; i < 12; i++) {
+            buildings.push({
+                x: Math.random() * (canvas.width - 100),
+                y: Math.random() * (canvas.height - 100),
+                w: 80 + Math.random() * 40,
+                h: 80 + Math.random() * 40
+            });
+        }
+
+        /* INPUTS */
+        const keys = {};
+        window.addEventListener("keydown", e => {
+            keys[e.key] = true;
+            // Shoot on spacebar press
+            if (e.code === "Space") shootNearest();
+            // Gun swap keys
+            if (e.key === "1") currentGun = 0;
+            if (e.key === "2") currentGun = 1;
+            if (e.key === "3") currentGun = 2;
+            if (e.key.toLowerCase() === "r") reload();
+        });
+        window.addEventListener("keyup", e => keys[e.key] = false);
+
+        // Mobile Joystick
+        let joyX = 0, joyY = 0;
+        const joyZone = document.getElementById("joystick-zone");
+        joyZone.addEventListener("touchmove", e => {
+            e.preventDefault();
+            const t = e.touches[0];
+            const r = joyZone.getBoundingClientRect();
+            joyX = (t.clientX - (r.left + r.width / 2)) / 10;
+            joyY = (t.clientY - (r.top + r.height / 2)) / 10;
+        });
+        joyZone.addEventListener("touchend", () => { joyX = joyY = 0; });
+
+        /* COMBAT LOGIC */
+        function reload() {
+            guns[currentGun].ammo = guns[currentGun].mag;
+        }
+
+        function shoot(targetX, targetY) {
+            const gun = guns[currentGun];
+            const now = Date.now();
+            if (gun.ammo <= 0 || now - lastShot < gun.rate) return;
+
+            lastShot = now;
+            gun.ammo--;
+
+            const angle = Math.atan2(targetY - player.y, targetX - player.x);
+            player.angle = angle;
+
+            bullets.push({
+                x: player.x,
+                y: player.y,
+                dx: Math.cos(angle) * 12,
+                dy: Math.sin(angle) * 12,
+                dmg: gun.dmg,
+                color: gun.color
+            });
+        }
+
+        function shootNearest() {
+            if (enemies.length === 0) return;
+            let closest = null;
+            let minDist = Infinity;
+
+            enemies.forEach(e => {
+                const d = Math.hypot(e.x - player.x, e.y - player.y);
+                if (d < minDist) { minDist = d; closest = e; }
+            });
+
+            if (closest) shoot(closest.x, closest.y);
+        }
+
+        // Button Events
+        document.getElementById("shoot-btn").addEventListener("touchstart", (e) => { e.preventDefault(); shootNearest(); });
+        document.getElementById("reload-btn").onclick = reload;
+        document.getElementById("gun-btn").onclick = () => currentGun = (currentGun + 1) % guns.length;
+
+        /* GAME LOOP */
+        function spawnEnemy() {
+            if (enemies.length < 10) {
+                const x = Math.random() > 0.5 ? -30 : canvas.width + 30;
+                const y = Math.random() * canvas.height;
+                enemies.push({ x, y, size: 18, hp: 100, color: "#ff4757" });
+            }
+        }
+        setInterval(spawnEnemy, 1500);
+
+        function update() {
+            // Movement - Arrow Keys
+            if (keys.ArrowUp) player.y -= player.speed;
+            if (keys.ArrowDown) player.y += player.speed;
+            if (keys.ArrowLeft) player.x -= player.speed;
+            if (keys.ArrowRight) player.x += player.speed;
+
+            // Movement - Joystick
+            player.x += joyX;
+            player.y += joyY;
+
+            // Boundary check
+            player.x = Math.max(player.size, Math.min(canvas.width - player.size, player.x));
+            player.y = Math.max(player.size, Math.min(canvas.height - player.size, player.y));
+
+            // Continuous shooting for SMG if space is held
+            if (keys.Space && currentGun === 1) shootNearest();
+
+            // Bullets
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                const b = bullets[i];
+                b.x += b.dx; b.y += b.dy;
+                if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) bullets.splice(i, 1);
+            }
+
+            // Enemies
+            enemies.forEach((e, ei) => {
+                const dist = Math.hypot(player.x - e.x, player.y - e.y);
+                e.x += (player.x - e.x) / dist * 1.8;
+                e.y += (player.y - e.y) / dist * 1.8;
+
+                if (dist < player.size + e.size) health -= 0.3;
+
+                bullets.forEach((b, bi) => {
+                    if (Math.hypot(b.x - e.x, b.y - e.y) < e.size) {
+                        e.hp -= b.dmg;
+                        bullets.splice(bi, 1);
+                        if (e.hp <= 0) {
+                            score += 20;
+                            if (Math.random() > 0.8) loot.push({ x: e.x, y: e.y, gun: Math.floor(Math.random() * guns.length) });
+                            enemies.splice(ei, 1);
+                        }
+                    }
+                });
+            });
+
+            // Loot
+            loot.forEach((l, li) => {
+                if (Math.hypot(player.x - l.x, player.y - l.y) < 30) {
+                    currentGun = l.gun;
+                    reload();
+                    loot.splice(li, 1);
+                }
+            });
+
+            if (health <= 0) { alert("GAME OVER! Score: " + score); location.reload(); }
+
+            // UI
+            healthEl.textContent = Math.max(0, Math.ceil(health));
+            scoreEl.textContent = score;
+            gunNameEl.textContent = guns[currentGun].name;
+            ammoEl.textContent = guns[currentGun].ammo + "/" + guns[currentGun].mag;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Grid pattern for "ground"
+            ctx.strokeStyle = "rgba(255,255,255,0.05)";
+            for (let i = 0; i < canvas.width; i += 50) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke(); }
+            for (let j = 0; j < canvas.height; j += 50) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width, j); ctx.stroke(); }
+
+            // Buildings
+            ctx.fillStyle = "#1e3d1a";
+            buildings.forEach(b => ctx.fillRect(b.x, b.y, b.w, b.h));
+
+            // Loot
+            loot.forEach(l => {
+                ctx.fillStyle = "gold";
+                ctx.beginPath(); ctx.arc(l.x, l.y, 10, 0, Math.PI * 2); ctx.fill();
+            });
+
+            // Identify target for auto-aim
+            let target = null;
+            let minDist = Infinity;
+            enemies.forEach(e => {
+                const d = Math.hypot(e.x - player.x, e.y - player.y);
+                if (d < minDist) { minDist = d; target = e; }
+            });
+
+            // Enemies
+            enemies.forEach(e => {
+                ctx.fillStyle = e.color;
+                ctx.beginPath(); ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2); ctx.fill();
+                // Health bar mini
+                ctx.fillStyle = "red"; ctx.fillRect(e.x - 15, e.y - 25, 30, 4);
+                ctx.fillStyle = "lime"; ctx.fillRect(e.x - 15, e.y - 25, (e.hp / 100) * 30, 4);
+
+                // Target ring
+                if (e === target) {
+                    ctx.strokeStyle = "white";
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath(); ctx.arc(e.x, e.y, e.size + 8, 0, Math.PI * 2); ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+            });
+
+            // Bullets
+            bullets.forEach(b => {
+                ctx.fillStyle = b.color;
+                ctx.beginPath(); ctx.arc(b.x, b.y, 4, 0, Math.PI * 2); ctx.fill();
+            });
+
+            // Player
+            ctx.save();
+            ctx.translate(player.x, player.y);
+            ctx.rotate(player.angle);
+            ctx.fillStyle = player.color;
+            ctx.beginPath(); ctx.arc(0, 0, player.size, 0, Math.PI * 2); ctx.fill();
+            // Gun Barrel
+            ctx.fillStyle = "#333";
+            ctx.fillRect(10, -4, 15, 8);
+            ctx.restore();
+        }
+
+        function main() {
+            update();
+            draw();
+            requestAnimationFrame(main);
+        }
+        main();
+    </script>
+</body>
+
+</html>
