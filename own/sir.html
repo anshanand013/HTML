@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ansh Anand | EduStream Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --brand: #4f46e5;
+            --brand-soft: rgba(79, 70, 229, 0.1);
+            --bg: #0b0f1a;
+            --card: #161b2c;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            background-color: var(--bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 6%;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            background: rgba(11, 15, 26, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo { font-size: 1.4rem; font-weight: 800; color: var(--brand); letter-spacing: -1px; }
+        .logo span { color: white; }
+
+        /* Hero / Header */
+        header {
+            text-align: center;
+            padding: 80px 20px;
+            background: radial-gradient(circle at center, #1e293b 0%, #0b0f1a 100%);
+        }
+
+        .badge {
+            background: var(--brand-soft);
+            color: #818cf8;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        h1 { font-size: clamp(2.5rem, 5vw, 4rem); margin: 20px 0; }
+        .hero-desc { color: var(--text-secondary); max-width: 600px; margin: 0 auto 40px; font-size: 1.1rem; }
+
+        /* Grid Layout */
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+
+        .section-title { margin-bottom: 30px; font-size: 1.8rem; }
+
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: var(--brand);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .icon-box {
+            width: 50px;
+            height: 50px;
+            background: var(--brand);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .card h3 { margin: 15px 0 10px; font-size: 1.3rem; }
+        .card p { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; }
+
+        /* Progress Section */
+        .creator-info {
+            background: linear-gradient(90deg, #1e293b, #0f172a);
+            border-radius: 30px;
+            padding: 40px;
+            margin-top: 60px;
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .avatar {
+            width: 70px;
+            height: 70px;
+            background: var(--brand);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.4rem;
+        }
+
+        .btn {
+            background: var(--brand);
+            color: white;
+            padding: 14px 30px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: 0.3s;
+        }
+
+        .btn:hover { background: #6366f1; transform: scale(1.05); }
+
+        footer {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        @media (max-width: 768px) {
+            .creator-info { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">ANSH<span>ANAND</span></div>
+        <div class="nav-links">
+            <a href="#" class="btn" style="padding: 10px 20px; font-size: 0.9rem;">Sign Up</a>
+        </div>
+    </nav>
+
+    <header>
+        <span class="badge">E-Learning Platform</span>
+        <h1>Learning Reimagined by <br><span style="color: var(--brand);">Ansh Anand</span></h1>
+        <p class="hero-desc">An all-in-one hub for mastering engineering, coding, and system design. Built for students, by a visionary at BCE Bhagalpur.</p>
+        <a href="#courses" class="btn">Start Learning Now</a>
+    </header>
+
+    <div class="container" id="courses">
+        <h2 class="section-title">Popular Tracks</h2>
+        <div class="course-grid">
+            
+            <div class="card">
+                <div class="icon-box"><i class="fa-solid fa-code"></i></div>
+                <h3>Full-Stack Mastery</h3>
+                <p>From HTML/CSS to advanced Backend architecture. Build production-ready apps from scratch.</p>
+            </div>
+
+            <div class="card">
+                <div class="icon-box"><i class="fa-solid fa-brain"></i></div>
+                <h3>Data Structures (DSA)</h3>
+                <p>Master the logic behind the code. Optimized algorithms to crack top-tier tech interviews.</p>
+            </div>
+
+            <div class="card">
+                <div class="icon-box"><i class="fa-solid fa-server"></i></div>
+                <h3>Cloud Computing</h3>
+                <p>Learn to deploy and scale applications using AWS, Docker, and Kubernetes.</p>
+            </div>
+
+        </div>
+
+        <div class="creator-info">
+            <div class="avatar">AA</div>
+            <div>
+                <h3 style="margin: 0;">Created by Ansh Anand</h3>
+                <p style="margin: 5px 0; color: var(--text-secondary);">Bridging the gap between theory and industry. This platform is my commitment to accessible, high-quality engineering education.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Ansh Anand | Designed for the Future of Learning</p>
+        <div style="margin-top: 15px;">
+            <a href="#" style="color: var(--text-secondary); margin: 0 10px;"><i class="fa-brands fa-linkedin"></i></a>
+            <a href="https://github.com/anshanand013/" style="color: var(--text-secondary); margin: 0 10px;"><i class="fa-brands fa-github"></i></a>
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Result Portal</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        h2 { color: #1a73e8; margin-top: 0; text-align: center; }
+
+        .controls { margin-bottom: 25px; display: flex; gap: 10px; }
+        
+        input[type="number"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        button {
+            padding: 12px 24px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        button:hover { background-color: #1557b0; }
+
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+            margin-top: 20px; 
+            animation: slideUp 0.4s ease-out;
+        }
+
+        th, td { border-bottom: 1px solid #f0f0f0; padding: 12px; text-align: left; }
+        th { color: #5f6368; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        .summary-row { font-weight: bold; background-color: #f8f9fa; }
+        .avg-val { color: #188038; font-size: 1.1rem; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Result Portal</h2>
+        <div class="controls">
+            <input type="number" id="rollInput" placeholder="Enter Roll (1-20)" min="1" max="20">
+            <button onclick="checkResult()">Search</button>
+        </div>
+        
+        <div id="displayArea"></div>
+    </div>
+
+    <script>
+        // 1. Database Setup
+        const students = [];
+        const subjectNames = ["Math", "English", "Science", "History", "Geography", "Art", "Physics", "Chemistry"];
+        
+        // 20 Unique Names
+        const names = [
+            "Liam Johnson", "Olivia Smith", "Noah Williams", "Emma Brown", 
+            "James Jones", "Sophia Garcia", "Lucas Miller", "Mia Davis", 
+            "Ethan Martinez", "Isabella Lopez", "Mason Gonzalez", "Aria Wilson", 
+            "Logan Anderson", "Amelia Thomas", "Jackson Taylor", "Charlotte Moore", 
+            "Aiden Jackson", "Harper Martin", "Sebastian Lee", "Evelyn Perez"
+        ];
+
+        // Generate the 20 students
+        for (let i = 1; i <= 20; i++) {
+            let marks = {};
+            let total = 0;
+            
+            subjectNames.forEach(sub => {
+                let score = Math.floor(Math.random() * 41) + 50; // Random score 50-90
+                marks[sub] = score;
+                total += score;
+            });
+
+            students.push({
+                roll: i.toString(),
+                name: names[i-1], // Assigns one of the 20 names based on roll
+                marks: marks,
+                total: total,
+                average: (total / subjectNames.length).toFixed(1)
+            });
+        }
+
+        // 2. Search Function
+        function checkResult() {
+            const input = document.getElementById("rollInput").value;
+            const display = document.getElementById("displayArea");
+            const student = students.find(s => s.roll === input);
+
+            if (student) {
+                let tableHTML = `
+                    <p style="margin-bottom:5px;"><strong>Student:</strong> ${student.name}</p>
+                    <p style="color:#666; font-size:0.9rem;">Roll Number: ${student.roll}</p>
+                    <table>
+                        <thead>
+                            <tr><th>Subject</th><th>Score</th></tr>
+                        </thead>
+                        <tbody>`;
+
+                for (let sub in student.marks) {
+                    tableHTML += `<tr><td>${sub}</td><td>${student.marks[sub]}</td></tr>`;
+                }
+
+                tableHTML += `
+                            <tr class="summary-row"><td>TOTAL</td><td>${student.total}</td></tr>
+                            <tr class="summary-row"><td>AVERAGE</td><td class="avg-val">${student.average}%</td></tr>
+                        </tbody>
+                    </table>`;
+
+                display.innerHTML = tableHTML;
+            } else {
+                display.innerHTML = "<p style='color:#d93025; text-align:center;'>Roll number not found!</p>";
+            }
+        }
+    </script>
+</body>
+</html>
