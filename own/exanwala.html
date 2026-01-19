@@ -1,0 +1,100 @@
+<html>
+
+<head>
+    <title>Document</title>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            background: linear-gradient(130deg, black, red);
+        }
+
+        h1 {
+            color: orange;
+        }
+
+        .card {
+            background: linear-gradient(130deg, blue, aqua, lightpink, pink);
+            margin: 20px;
+            border-radius: 15px;
+            padding: 10px;
+        }
+
+        footer {
+            background-color: black;
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>
+        <marquee behavior="alternate"><u>Form for Admission</u></marquee>
+    </h1>
+    <form>
+        <div class="card">
+            <h2>Personal Information</h2>
+            <label for="name">Firstname:</label>
+            <input type="text" id="name"><br>
+            <label for="momname">Mother's name:</label>
+            <input type="text" id="momname"><br>
+            <label for="dadname">Father's name:</label>
+            <input type="text" id="dadname"><br>
+            <label for="dob">Date of Birth</label>
+            <input type="date" id="dob"><br>
+            <label for="sub">Subject:</label>
+            <select id="sub">
+                <center>
+                    <option>--Select Class--</option>
+                    <option>Pre-Nursery</option>
+                    <option>Nursery</option>
+                    <option value="">Class 1</option>
+                    <option value="">Class 2</option>
+                    <option value="">Class 3</option>
+                    <option value="">Class 4</option>
+                    <option value="">Class 5</option>
+                    <option value="">Class 6</option>
+                    <option value="">Class 7</option>
+                    <option value="">Class 8</option>
+                    <option value="">Class 9</option>
+                    <option value="">Class 10</option>
+                </center>
+            </select><br>
+            <label for="gender">Gender:</label>
+            <input type="radio" id="male" name="gender">
+            <label for="male">Male</label>
+            <input type="radio" id="female" name="gender">
+            <label for="female">Female</label>
+        </div>
+        <div class="card">
+            <h2>Document</h2>
+            <label for="birthce">Birth Certificate:</label>
+            <input type="file" id="birthce"><br>
+            <label for="picce">Photo:</label>
+            <input type="file" id="picce"><br>
+            <label for="picfce">Mother's Photo:</label>
+            <input type="file" id="picfce"><br>
+            <label for="picmce">Father's Photo:</label>
+            <input type="file" id="picmce"><br>
+            <label for="anyce">Any Certificate got in Previous class:</label><br>
+            <input type="file" id="anyce">
+        </div>
+        <div class="card">
+            <h2>Declaration</h2>
+            <input type="checkbox" id="declare">
+            <label for="declare">I hereby declare that all details entered are correct</label>
+            <p align="center">
+                <input type="submit">
+                <input type="reset">
+            </p>
+        </div>
+    </form>
+    <footer>
+        <center>
+            <marquee>
+                Copyright reserved to Mount Assisi School<br>
+                Contact: mountassisischoolbgp.com
+    </footer>
+</body>
+
+</html>
